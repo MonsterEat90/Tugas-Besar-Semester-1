@@ -1,3 +1,5 @@
-print('Hello', 'how are you?')
-x = ('apple', 'banana', 'cherry')
-print(x)
+from tkinter import *
+from tkinter import ttk
+root = Tk()
+ttk.Button(root, text="Hello World").grid()
+root.mainloop()
