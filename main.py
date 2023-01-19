@@ -127,7 +127,7 @@ def update_data():
 def import_data():
     engine = create_engine('sqlite:///data.db')
     df = pd.read_sql_table("Inventory", engine)
-    df.to_excel("data.xlsx")
+    df.to_csv("data.csv")
 
 
 titleLabel = Label(root, text=storeName, font=('Arial bold', 30), bd=2)
