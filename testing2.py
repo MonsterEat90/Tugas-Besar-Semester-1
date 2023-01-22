@@ -45,14 +45,13 @@ def add_motorcycle():
 
 
 def update_motorcycle():
-    selected_item = listbox.get(ACTIVE)
-    index = motorcycles.index(selected_item)
-    motorcycles[index][0] = make_entry.get()
-    motorcycles[index][1] = model_entry.get()
-    motorcycles[index][2] = year_entry.get()
-    motorcycles[index][3] = color_entry.get()
+    selected_index = listbox.curselection()[0]
+    motorcycles[selected_index][0] = make_entry.get()
+    motorcycles[selected_index][1] = model_entry.get()
+    motorcycles[selected_index][2] = year_entry.get()
+    motorcycles[selected_index][3] = color_entry.get()
     listbox.delete(ACTIVE)
-    listbox.insert(index, motorcycles[index])
+    listbox.insert(selected_index, motorcycles[selected_index])
     make_entry.delete(0, END)
     model_entry.delete(0, END)
     year_entry.delete(0, END)
@@ -63,9 +62,8 @@ def update_motorcycle():
 
 
 def delete_motorcycle():
-    selected_item = listbox.get(ACTIVE)
-    index = motorcycles.index(selected_item)
-    del motorcycles[index]
+    selected_index = listbox.curselection()[0]
+    del motorcycles[selected_index]
     listbox.delete(ACTIVE)
     save_data()
 
@@ -73,7 +71,8 @@ def delete_motorcycle():
 
 
 def select_motorcycle(event):
-    selected_item = listbox.get(ACTIVE)
+    selected_index = listbox.curselection()[0]
+    selected_item = motorcycles[selected_index]
     make_entry.delete(0, END)
     make_entry.insert(0, selected_item[0])
     model_entry.delete(0, END)
@@ -82,6 +81,15 @@ def select_motorcycle(event):
     year_entry.insert(0, selected_item[2])
     color_entry.delete(0, END)
     color_entry.insert(0, selected_item[3])
+
+# Function to clear the input fields
+
+
+def clear_input():
+    make_entry.delete(0, END)
+    model_entry.delete(0, END)
+    year_entry.delete(0, END)
+    color_entry.delete(0, END)
 
 
 # Create labels for input fields
@@ -116,6 +124,8 @@ update_button = Button(root, text="Update", command=update_motorcycle)
 update_button.grid(row=4, column=1, padx=5, pady=5)
 delete_button = Button(root, text="Delete", command=delete_motorcycle)
 delete_button.grid(row=4, column=2, padx=5, pady=5)
+clear_button = Button(root, text="Clear", command=clear_input)
+clear_button.grid(row=5, column=0, padx=5, pady=5)
 
 # Load data from CSV file
 load_data()
