@@ -1,142 +1,91 @@
+import csv
 import tkinter as tk
-from tkinter import ttk
-import pandas as pd
+from tkinter import messagebox
 
-# Read data from CSV file
-df = pd.read_csv('rumah.csv')
+# Create a new Tkinter app
+app = tk.Tk()
+app.title("Food and Drink Menu")
 
-# Create main window
-root = tk.Tk()
-root.title("Data Rumah")
+# Create a CSV file to store menu items
+with open("menu.csv", "a+", newline="") as file:
+    writer = csv.writer(file)
 
-create_win = None
-
-# Create a treeview to display data
-tree = ttk.Treeview(root)
-tree["columns"] = ("alamat", "luas", "harga", "jumlah_kamar",
-                   "kamar_mandi", "garasi", "tahun_dibangun", "sertifikat", "fasilitas")
-tree.heading("#0", text="ID")
-tree.heading("alamat", text="Alamat")
-tree.heading("luas", text="Luas")
-tree.heading("harga", text="Harga")
-tree.heading("jumlah_kamar", text="Jumlah Kamar")
-tree.heading("kamar_mandi", text="Jumlah Kamar Mandi")
-tree.heading("garasi", text="Garasi")
-tree.heading("tahun_dibangun", text="Tahun Dibangun")
-tree.heading("sertifikat", text="Sertifikat")
-tree.heading("fasilitas", text="Fasilitas")
-tree.column("#0", width=50)
-tree.column("alamat", width=200)
-tree.column("luas", width=100)
-tree.column("harga", width=100)
-tree.column("jumlah_kamar", width=120)
-tree.column("kamar_mandi", width=120)
-tree.column("garasi", width=100)
-tree.column("tahun_dibangun", width=120)
-tree.column("sertifikat", width=120)
-tree.column("fasilitas", width=200)
-tree.pack()
-
-# Insert data into treeview
-for i in range(len(df)):
-    tree.insert("", "end", text=str(df.iloc[i]["id"]), values=(df.iloc[i]["alamat"], df.iloc[i]["luas"], df.iloc[i]["harga"], df.iloc[i]["jumlah_kamar"],
-                df.iloc[i]["kamar_mandi"], df.iloc[i]["garasi"], df.iloc[i]["tahun_dibangun"], df.iloc[i]["sertifikat"], df.iloc[i]["fasilitas"]))
-
-# Create function for "Create" button
+# Function to add a new menu item
 
 
-def create_data():
-    global create_win
-    # Open a new window for user input
-    create_win = tk.Toplevel(root)
-    create_win.title("Create Data")
+def add_item():
+    item = item_entry.get()
+    price = price_entry.get()
+    with open("menu.csv", "a", newline="") as file:
+        writer = csv.writer(file)
+        writer.writerow([item, price])
+    messagebox.showinfo("Success", "Item added to menu.")
 
-    # Create labels and entry fields for input
-    alamat_label = tk.Label(create_win, text="Alamat:")
-    alamat_label.grid(row=0, column=0)
-    alamat_entry = tk.Entry(create_win)
-    alamat_entry.grid(row=0, column=1)
-
-    luas_label = tk.Label(create_win, text="Luas:")
-    luas_label.grid(row=1, column=0)
-    luas_entry = tk.Entry(create_win)
-    luas_entry.grid(row=1, column=1)
-
-    harga_label = tk.Label(create_win, text="Harga:")
-    harga_label.grid(row=2, column=0)
-    harga_entry = tk.Entry(create_win)
-    harga_entry.grid(row=2, column=1)
-
-    jumlah_kamar_label = tk.Label(create_win, text="Jumlah Kamar:")
-    jumlah_kamar_label.grid(row=3, column=0)
-    jumlah_kamar_entry = tk.Entry(create_win)
-    jumlah_kamar_entry.grid(row=3, column=1)
-
-    kamar_mandi_label = tk.Label(create_win, text="Jumlah Kamar Mandi:")
-    kamar_mandi_label.grid(row=4, column=0)
-    kamar_mandi_entry = tk.Entry(create_win)
-    kamar_mandi_entry.grid(row=4, column=1)
-
-    garasi_label = tk.Label(create_win, text="Garasi:")
-    garasi_label.grid(row=5, column=0)
-    garasi_entry = tk.Entry(create_win)
-    garasi_entry.grid(row=5, column=1)
-
-    tahun_dibangun_label = tk.Label(create_win, text="Tahun Dibangun:")
-    tahun_dibangun_label.grid(row=6, column=0)
-    tahun_dibangun_entry = tk.Entry(create_win)
-    tahun_dibangun_entry.grid(row=6, column=1)
-
-    sertifikat_label = tk.Label(create_win, text="Sertifikat:")
-    sertifikat_label.grid(row=7, column=0)
-    sertifikat_entry = tk.Entry(create_win)
-    sertifikat_entry.grid(row=7, column=1)
-
-    fasilitas_label = tk.Label(create_win, text="Fasilitas:")
-    fasilitas_label.grid(row=8, column=0)
-    fasilitas_entry = tk.Entry(create_win)
-    fasilitas_entry.grid(row=8, column=1)
-
-    # Create "Save" button
-    save_button = tk.Button(create_win, text="Save", command=save_data)
-    save_button.grid(row=9, column=1)
+# Function to view current menu
 
 
-def save_data():
-    for child in root.children.values():
-        if child.winfo_class() == 'Toplevel':
-            child.destroy()
-    # Get user input
-    alamat = tk.Entry(root)
-    luas = tk.Entry(root)
-    harga = tk.Entry(root)
-    jumlah_kamar = tk.Entry(root)
-    kamar_mandi = tk.Entry(root)
-    garasi = tk.Entry(root)
-    tahun_dibangun = tk.Entry(root)
-    sertifikat = tk.Entry(root)
-    fasilitas = tk.Entry(root)
-    # Get the next id value
-    next_id = df["id"].max() + 1
+def view_menu():
+    with open("menu.csv", "r") as file:
+        reader = csv.reader(file)
+        menu_list = list(reader)
+    menu_string = ""
+    for item in menu_list:
+        menu_string += f"{item[0]}: Rp {item[1]}\n"
+    messagebox.showinfo("Menu", menu_string)
 
-    # Append new data to the DataFrame
-    df.loc[len(df)] = [next_id, alamat, luas, harga, jumlah_kamar,
-                       kamar_mandi, garasi, tahun_dibangun, sertifikat, fasilitas]
-
-    # Save DataFrame to CSV file
-    df.to_csv('rumah.csv', index=False)
-
-    # Insert new data into treeview
-    tree.insert("", "end", text=str(next_id), values=(alamat, luas, harga,
-                jumlah_kamar, kamar_mandi, garasi, tahun_dibangun, sertifikat, fasilitas))
-
-    # Close the create window
-    create_win.destroy()
+# Function to update an existing menu item
 
 
-# Create "Create" button
-create_button = tk.Button(root, text="Create", command=create_data)
-create_button.pack()
+def update_item():
+    item = item_entry.get()
+    price = price_entry.get()
+    with open("menu.csv", "r") as file:
+        reader = csv.reader(file)
+        menu_list = list(reader)
+    for i, menu_item in enumerate(menu_list):
+        if menu_item[0] == item:
+            menu_list[i][1] = price
+    with open("menu.csv", "w", newline="") as file:
+        writer = csv.writer(file)
+        writer.writerows(menu_list)
+    messagebox.showinfo("Success", "Item updated.")
 
-# Run main loop
-root.mainloop()
+# Function to delete a menu item
+
+
+def delete_item():
+    item = item_entry.get()
+    with open("menu.csv", "r") as file:
+        reader = csv.reader(file)
+        menu_list = list(reader)
+    for i, menu_item in enumerate(menu_list):
+        if menu_item[0] == item:
+            del menu_list[i]
+    with open("menu.csv", "w", newline="") as file:
+        writer = csv.writer(file)
+        writer.writerows(menu_list)
+    messagebox.showinfo("Success", "Item deleted.")
+
+
+# Create Tkinter widgets for adding a new menu item
+item_label = tk.Label(app, text="Item:")
+item_label.grid(row=0, column=0)
+item_entry = tk.Entry(app)
+item_entry.grid(row=0, column=1)
+price_label = tk.Label(app, text="Price:")
+price_label.grid(row=1, column=0)
+price_entry = tk.Entry(app)
+price_entry.grid(row=1, column=1)
+add_button = tk.Button(app, text="Add Item", command=add_item)
+add_button.grid(row=2, column=0, columnspan=2, pady=10)
+
+# Create Tkinter widgets for viewing, updating, and deleting menu items
+view_button = tk.Button(app, text="View Menu", command=view_menu)
+view_button.grid(row=3, column=0, columnspan=2, pady=10)
+update_button = tk.Button(app, text="Update Item", command=update_item)
+update_button.grid(row=4, column=0, columnspan=2, pady=10)
+delete_button = tk.Button(app, text="Delete Item", command=delete_item)
+delete_button.grid(row=5, column=0, columnspan=2, pady=10)
+
+# Run the Tkinter app
+app.mainloop()
