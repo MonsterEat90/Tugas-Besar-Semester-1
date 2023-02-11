@@ -1,198 +1,139 @@
-import sqlite3
-import pandas as pd
-from sqlalchemy import create_engine
+import csv
 from tkinter import *
-from tkinter import ttk
 
 root = Tk()
-root.title("Data Motor")
-root.geometry("1080x720")
-my_tree = ttk.Treeview(root)
-storeName = "Data Motor"
+root.title("Motorcycle CRUD App")
+
+motorcycles = []
 
 
-def reverse(tuples):
-    new_tup = tuples[::-1]
-    return new_tup
+def load_data():
+    with open('motor.csv', 'r') as file:
+        reader = csv.reader(file)
+        for row in reader:
+            motorcycles.append(row)
 
 
-def insert(id, name, price, quantity):
-    conn = sqlite3.connect("data.db")
-    cursor = conn.cursor()
-
-    cursor.execute("""CREATE TABLE IF NOT EXISTS 
-    inventory(itemId TEXT, itemName TEXT, itemPrice TEXT, itemQuantity TEXT)""")
-
-    cursor.execute("INSERT INTO inventory VALUES ('" + str(id) + "','" +
-                   str(name) + "','" + str(price) + "','" + str(quantity) + "')")
-    conn.commit()
+def save_data():
+    with open('motor.csv', 'w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerows(motorcycles)
 
 
-def delete(data):
-    conn = sqlite3.connect("data.db")
-    cursor = conn.cursor()
-
-    cursor.execute("""CREATE TABLE IF NOT EXISTS 
-        inventory(itemId TEXT, itemName TEXT, itemPrice TEXT, itemQuantity TEXT)""")
-
-    cursor.execute("DELETE FROM inventory WHERE itemId = '" + str(data) + "'")
-    conn.commit()
-
-
-def update(id, name, price, quantity,  idName):
-    conn = sqlite3.connect("data.db")
-    cursor = conn.cursor()
-
-    cursor.execute("""CREATE TABLE IF NOT EXISTS 
-        inventory(itemId TEXT, itemName TEXT, itemPrice TEXT, itemQuantity TEXT)""")
-
-    cursor.execute("UPDATE inventory SET itemId = '" + str(id) + "', itemName = '" + str(name) +
-                   "', itemPrice = '" + str(price) + "', itemQuantity = '" + str(quantity) + "' WHERE itemId='"+str(idName)+"'")
-    conn.commit()
+def add_motorcycle():
+    merk = merk_entry.get()
+    model = model_entry.get()
+    year = year_entry.get()
+    color = color_entry.get()
+    motorcycle = [merk, model, year, color]
+    motorcycles.append(motorcycle)
+    listbox.insert(END, motorcycle)
+    merk_entry.delete(0, END)
+    model_entry.delete(0, END)
+    year_entry.delete(0, END)
+    color_entry.delete(0, END)
+    save_data()
 
 
-def read():
-    conn = sqlite3.connect("data.db")
-    cursor = conn.cursor()
-
-    cursor.execute("""CREATE TABLE IF NOT EXISTS 
-        inventory(itemId TEXT, itemName TEXT, itemPrice TEXT, itemQuantity TEXT)""")
-
-    cursor.execute("SELECT * FROM inventory")
-    results = cursor.fetchall()
-    conn.commit()
-    return results
-
-
-def insert_data():
-    itemId = str(entryId.get())
-    itemName = str(entryName.get())
-    itemPrice = str(entryPrice.get())
-    itemQuantity = str(entryQuantity.get())
-    if itemId == "" or itemName == " ":
-        print("Error Inserting Id")
-    if itemName == "" or itemName == " ":
-        print("Error Inserting Name")
-    if itemPrice == "" or itemPrice == " ":
-        print("Error Inserting Price")
-    if itemQuantity == "" or itemQuantity == " ":
-        print("Error Inserting Quantity")
-    else:
-        insert(str(itemId), str(itemName), str(itemPrice), str(itemQuantity))
-
-    for data in my_tree.get_children():
-        my_tree.delete(data)
-
-    for result in reverse(read()):
-        my_tree.insert(parent='', index='end', iid=result,
-                       text="", values=(result), tag="orow")
-
-    my_tree.tag_configure('orow', background='#EEEEEE')
-    my_tree.grid(row=1, column=5, columnspan=4, rowspan=5, padx=10, pady=10)
+def update_motorcycle():
+    selected_index = listbox.curselection()[0]
+    motorcycles[selected_index][0] = merk_entry.get()
+    motorcycles[selected_index][1] = model_entry.get()
+    motorcycles[selected_index][2] = year_entry.get()
+    motorcycles[selected_index][3] = color_entry.get()
+    listbox.delete(ACTIVE)
+    listbox.insert(selected_index, motorcycles[selected_index])
+    merk_entry.delete(0, END)
+    model_entry.delete(0, END)
+    year_entry.delete(0, END)
+    color_entry.delete(0, END)
+    search()
+    save_data()
 
 
-def delete_data():
-    selected_item = my_tree.selection()[0]
-    deleteData = str(my_tree.item(selected_item)['values'][0])
-    delete(deleteData)
-
-    for data in my_tree.get_children():
-        my_tree.delete(data)
-
-    for result in reverse(read()):
-        my_tree.insert(parent='', index='end', iid=result,
-                       text="", values=(result), tag="orow")
-
-    my_tree.tag_configure('orow', background='#EEEEEE')
-    my_tree.grid(row=1, column=5, columnspan=4, rowspan=5, padx=10, pady=10)
+def delete_motorcycle():
+    selected_index = listbox.curselection()[0]
+    del motorcycles[selected_index]
+    listbox.delete(ACTIVE)
+    search()
+    save_data()
 
 
-def update_data():
-    selected_item = my_tree.selection()[0]
-    update_name = my_tree.item(selected_item)['values'][0]
-    update(entryId.get(), entryName.get(), entryPrice.get(),
-           entryQuantity.get(), update_name)
-
-    for data in my_tree.get_children():
-        my_tree.delete(data)
-
-    for result in reverse(read()):
-        my_tree.insert(parent='', index='end', iid=result,
-                       text="", values=(result), tag="orow")
-
-    my_tree.tag_configure('orow', background='#EEEEEE')
-    my_tree.grid(row=1, column=5, columnspan=4, rowspan=5, padx=10, pady=10)
+def select_motorcycle(event):
+    selected_index = listbox.curselection()[0]
+    selected_item = motorcycles[selected_index]
+    merk_entry.delete(0, END)
+    merk_entry.insert(0, selected_item[0])
+    model_entry.delete(0, END)
+    model_entry.insert(0, selected_item[1])
+    year_entry.delete(0, END)
+    year_entry.insert(0, selected_item[2])
+    color_entry.delete(0, END)
+    color_entry.insert(0, selected_item[3])
 
 
-def import_data():
-    engine = create_engine('sqlite:///data.db')
-    df = pd.read_sql_table("Inventory", engine)
-    df.to_csv("data.csv")
+def clear_input():
+    merk_entry.delete(0, END)
+    model_entry.delete(0, END)
+    year_entry.delete(0, END)
+    color_entry.delete(0, END)
 
 
-titleLabel = Label(root, text=storeName, font=('Arial bold', 30), bd=2)
-titleLabel.grid(row=0, column=0, columnspan=8, padx=20, pady=20)
+def search(event=None):
+    search_term = search_entry.get()
+    listbox.delete(0, END)
+    for motorcycle in motorcycles:
+        if search_term.lower() in motorcycle[0].lower() or search_term.lower() in motorcycle[1].lower():
+            listbox.insert(END, motorcycle)
 
-idLabel = Label(root, text="ID", font=('Arial bold', 15))
-nameLabel = Label(root, text="Name", font=('Arial bold', 15))
-priceLabel = Label(root, text="Price", font=('Arial bold', 15))
-quantityLabel = Label(root, text="Quantity", font=('Arial bold', 15))
-idLabel.grid(row=1, column=0, padx=10, pady=10)
-nameLabel.grid(row=2, column=0, padx=10, pady=10)
-priceLabel.grid(row=3, column=0, padx=10, pady=10)
-quantityLabel.grid(row=4, column=0, padx=10, pady=10)
 
-entryId = Entry(root, width=25, bd=5, font=('Arial bold', 15))
-entryName = Entry(root, width=25, bd=5, font=('Arial bold', 15))
-entryPrice = Entry(root, width=25, bd=5, font=('Arial bold', 15))
-entryQuantity = Entry(root, width=25, bd=5, font=('Arial bold', 15))
-entryId.grid(row=1, column=1, columnspan=3, padx=5, pady=5)
-entryName.grid(row=2, column=1, columnspan=3, padx=5, pady=5)
-entryPrice.grid(row=3, column=1, columnspan=3, padx=5, pady=5)
-entryQuantity.grid(row=4, column=1, columnspan=3, padx=5, pady=5)
+# keterangan input
+make_label = Label(root, text="Merek")
+make_label.grid(row=0, column=0, padx=5, pady=5)
+model_label = Label(root, text="Model")
+model_label.grid(row=1, column=0, padx=5, pady=5)
+year_label = Label(root, text="Tahun")
+year_label.grid(row=2, column=0, padx=5, pady=5)
+color_label = Label(root, text="Warna")
+color_label.grid(row=3, column=0, padx=5, pady=5)
 
-buttonEnter = Button(
-    root, text="Enter", padx=5, pady=5, width=5,
-    bd=3, font=('Arial', 15), bg="#0099ff", command=insert_data)
-buttonEnter.grid(row=5, column=1, columnspan=1)
+# tempat input
+merk_entry = Entry(root)
+merk_entry.grid(row=0, column=1, padx=5, pady=5)
+model_entry = Entry(root)
+model_entry.grid(row=1, column=1, padx=5, pady=5)
+year_entry = Entry(root)
+year_entry.grid(row=2, column=1, padx=5, pady=5)
+color_entry = Entry(root)
+color_entry.grid(row=3, column=1, padx=5, pady=5)
 
-buttonUpdate = Button(
-    root, text="Update", padx=5, pady=5, width=5,
-    bd=3, font=('Arial', 15), bg="#ffff00", command=update_data)
-buttonUpdate.grid(row=5, column=2, columnspan=1)
+# tempat untuk memunculkan data csv
+listbox = Listbox(root, width=50, height=20)
+listbox.grid(row=0, column=2, rowspan=6, padx=5, pady=5)
+listbox.bind('<<ListboxSelect>>', select_motorcycle)
 
-buttonDelete = Button(
-    root, text="Delete", padx=5, pady=5, width=5,
-    bd=3, font=('Arial', 15), bg="#e62e00", command=delete_data)
-buttonDelete.grid(row=5, column=3, columnspan=1)
+# tombol CDUS
+add_button = Button(root, text="Add", command=add_motorcycle)
+add_button.grid(row=4, column=0, padx=5, pady=5)
+update_button = Button(root, text="Update", command=update_motorcycle)
+update_button.grid(row=4, column=1, padx=5, pady=5)
+delete_button = Button(root, text="Delete", command=delete_motorcycle)
+delete_button.grid(row=5, column=1, padx=5, pady=5)
+search_label = Label(root, text="Search")
+search_label.grid(row=0, column=3, padx=5, pady=5, sticky=W)
+search_entry = Entry(root)
+search_entry.grid(row=0, column=4, padx=5, pady=5, sticky=W)
+search_entry.bind('<Return>', search)
 
-buttonImport = Button(
-    root, text="Import", padx=5, pady=5, width=5,
-    bd=3, font=('Arial', 15), bg="#80D0C7", command=import_data)
-buttonImport.grid(row=5, column=4, columnspan=1)
+# menghilangkan tulisan pada input fields
+clear_button = Button(root, text="Clear", command=clear_input)
+clear_button.grid(row=5, column=0, padx=5, pady=5)
 
-style = ttk.Style()
-style.configure("Treeview.Heading", font=('Arial bold', 15))
+# Load data
+load_data()
 
-my_tree['columns'] = ("ID", "Name", "Price", "Quantity")
-my_tree.column("#0", width=0, stretch=NO)
-my_tree.column("ID", anchor=W, width=100)
-my_tree.column("Name", anchor=W, width=200)
-my_tree.column("Price", anchor=W, width=150)
-my_tree.column("Quantity", anchor=W, width=150)
-my_tree.heading("ID", text="ID", anchor=W)
-my_tree.heading("Name", text="Name", anchor=W)
-my_tree.heading("Price", text="Price", anchor=W)
-my_tree.heading("Quantity", text="Quantity", anchor=W)
-
-for data in my_tree.get_children():
-    my_tree.delete(data)
-
-for result in reverse(read()):
-    my_tree.insert(parent='', index='end', iid=0,
-                   text="", values=(result), tag="orow")
-
-my_tree.tag_configure('orow', background='#EEEEEE', font=('Arial bold', 15))
-my_tree.grid(row=1, column=5, columnspan=4, rowspan=5, padx=10, pady=10)
+# membaca data dari csv
+for motorcycle in motorcycles:
+    listbox.insert(END, motorcycle)
 
 root.mainloop()
